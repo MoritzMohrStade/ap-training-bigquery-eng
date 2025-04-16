@@ -1,0 +1,18 @@
+config {
+    type: "table"
+}
+select 
+  *
+  ,"202101" as month
+from (
+SELECT
+  start
+  ,event.end
+  ,event.density
+  ,sum(density)over(order by start rows between unbounded preceding and current row) as running_sum
+FROM
+  ${ref("202101")},
+  UNNEST(first_contentful_paint.histogram.bin) as event
+order by start)
+where
+running_sum = 0.52495

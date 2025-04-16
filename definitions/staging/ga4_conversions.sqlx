@@ -1,0 +1,17 @@
+config {
+    type: "table"
+}
+
+js {
+    const dates = require("dataform-date");
+}
+
+select
+    format_date("%Y%m",parse_date('%Y%m%d',event_date)) as month
+    ,count(*) as conversions
+from
+    ${ref("events_*")}
+where 1=1
+    and ${dates.range("suffix","20210101","20210131")}
+    and event_name = "purchase"
+group by all

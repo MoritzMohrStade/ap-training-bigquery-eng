@@ -1,0 +1,5 @@
+config {
+    type: "declaration",
+    schema:"crux_data_google_merchandise",
+    name: "202101"
+}

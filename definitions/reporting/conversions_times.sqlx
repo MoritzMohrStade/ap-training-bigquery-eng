@@ -1,0 +1,10 @@
+config {
+    type: "table"
+}
+
+select
+    *
+from
+    ${ref("ga4_conversions")}
+left join ${ref("fcp_median")}
+    using(month)
