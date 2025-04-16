@@ -1,0 +1,42 @@
+config {
+    type: "table",
+    description: "This is a nice session table",
+    bigquery: {
+        partitionBy: "session_date",
+        clusterBy: ["session_device_category"]
+    },
+    columns:{
+        session_date: "Date when the session started",
+    },
+    assertions:{
+        nonNull: ["session_id"],
+        uniqueKey: ["session_id"]
+    }
+}
+js {
+    const dates = require("dataform-date");
+}
+select
+    parse_date('%Y%m%d',event_date) as session_date
+    ,farm_fingerprint(concat(user_pseudo_id, (select value.int_value from unnest(event_params) where key = "ga_session_id"))) as session_id
+    ,array_agg(
+        if(event_name= "page_view", 
+        struct(
+            event_timestamp
+            ,timestamp_micros(event_timestamp) as event_datetime
+            ,event_name
+            ,(select value.string_value from unnest(event_params) where key = 'page_location') as page_location
+            ,(select value.string_value from unnest(event_params) where key = 'page_referrer') as page_referrer
+        )
+        ,null)
+        ignore nulls order by event_timestamp
+    ) as session_page_views
+    ,min_by(device.category,event_timestamp) as session_device_category
+from
+    ${ref("events_*")}
+where 1=1
+    and ${dates.range("suffix","20210101","20210101")}
+   -- and ${dates.range("suffix",-3,-1)} -- current_
+    --and _table_suffix between "20210101" and "20210101"
+
+group by all

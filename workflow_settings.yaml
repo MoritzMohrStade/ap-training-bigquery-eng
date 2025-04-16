@@ -1,0 +1,4 @@
+defaultProject: ap-training-bigquery-eng
+defaultLocation: US
+defaultDataset: dataform
+defaultAssertionDataset: dataform_assertions
